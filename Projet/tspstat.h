@@ -63,7 +63,7 @@ double dist_euclidienne(instance_t instance, int v1, int v2);
 double tour_length_mat(instance_t instance,int *tabTour);
 void swap (int *tab,int ind1,int ind2);
 void renverse_tab(int *tab,int prem,int der);
-void affiche_tab_int(int *tab,int dim, FILE *logfp);
+void affiche_tab_int(int *tab,int dim);
 void affiche_tab_char_hex(char *tab,int dim, FILE *logfp);
 void affiche_tab_char(char *tab,int dim, FILE *logfp);
 bool prefix(char *motif,char *buf);
@@ -94,4 +94,7 @@ double init_tour_ppv(instance_t instance, int depart, tour_t *tournee);
 void dump_instance(instance_t instance);
 void dump_matrice_dist(instance_t instance);
 void print_solution(char * methode,instance_t instance,tour_t t,double longueur,double tps);
+double calcul_distance(int x1, int y1, int x2, int y2);
+double calcul_distance_totale(instance_t* instance);
+void copier_tableau(int* tab1,int* tab2, instance_t* tsp);
 #endif

@@ -1,23 +1,23 @@
 #include "tspstat.h"
 #include "force_brute.h"
-#define NBCHARMAX 100
+#define NBCHARMAX 80
 
-int lire_fichier_test(char* chemin, instance_t* tsp )
+int lire_fichier_test(char* chemin, instance_t* tsp)
 {
+    printf("\ndebutmain\n");
     int depart;
     char premier_mot[NBCHARMAX];
     char x[NBCHARMAX];
     char y[NBCHARMAX];
     char ligne[NBCHARMAX];
     int j,k=0;
-
     FILE* fichier = fopen(chemin, "r");
     if (fichier != NULL)
     {
         while (fgets(ligne, NBCHARMAX, fichier)!=NULL)
         {
             int i=0;
-            while (ligne[i]!=' ' && ligne[i]!='\n')
+            while (i< NBCHARMAX && ligne[i]!=' ' && ligne[i]!='\n')
             {
                 premier_mot[i]=ligne[i];
                 i++;
@@ -26,7 +26,7 @@ int lire_fichier_test(char* chemin, instance_t* tsp )
             if (strcmp(premier_mot, "NAME")==0)
             {
                 depart=7;
-                while (ligne[depart]!='\n' && depart<=NBCHARMAX)
+                while (ligne[depart]!='\n' && depart-7<NBCHARMAX)
                 {
                     tsp->name[depart-7]=ligne[depart];
                     depart++;
@@ -36,7 +36,7 @@ int lire_fichier_test(char* chemin, instance_t* tsp )
             if (strcmp(premier_mot, "TYPE")==0)
             {
                 depart=7;
-                while (ligne[depart]!='\n' && depart<=NBCHARMAX)
+                while (ligne[depart]!='\n' && depart-7<NBCHARMAX)
                 {
                     tsp->type[depart-7]=ligne[depart];
                     depart++;
@@ -47,22 +47,25 @@ int lire_fichier_test(char* chemin, instance_t* tsp )
             {
                 depart=12;
                 char char_dim[NBCHARMAX];
-                while (ligne[depart]!='\n' && depart<=NBCHARMAX)
+                while (ligne[depart]!='\n' && depart-12<NBCHARMAX)
                 {
                     char_dim[depart-12]=ligne[depart];
                     depart++;
                 }
                 char_dim[depart-12]='\0';
                 tsp->dimension=atoi(char_dim);
-                for (int n=0; n<tsp->dimension; n++)
-                {
-                    tsp->tabTour[n]=n+1;
-                }
             }
+
+            tsp->tabTour=creer_tab_int(tsp->dimension);
+            for (int n=0; n<tsp->dimension; n++)
+            {
+                tsp->tabTour[n]=n+1;
+            }
+
             if (strcmp(premier_mot, "EDGE_WEIGHT_TYPE")==0)
             {
                 depart=19;
-                while (ligne[depart]!='\n' && depart<=NBCHARMAX)
+                while (ligne[depart]!='\n' && depart-19<NBCHARMAX)
                 {
                     tsp->EDGE_TYPE[depart-19]=ligne[depart];
                     depart++;
@@ -84,24 +87,30 @@ int lire_fichier_test(char* chemin, instance_t* tsp )
                         }
                         k++;
                         j=k;
-                        while (ligne[k]!=' ' && k<=NBCHARMAX)
+                        while (ligne[k]!=' ' && k<NBCHARMAX)
                         {
                             x[k-j]=ligne[k];
                             k++;
                         }
+                        x[k-j] = '\0';
                         tsp->tabCoord[li][0]=atoi(x);
                         k++;
                         j=k;
-                        while (ligne[k]!='\n' && k<=NBCHARMAX)
+                        while (ligne[k]!='\n' && k<NBCHARMAX)
                         {
                             y[k-j]=ligne[k];
                             k++;
                         }
+                        y[k-j] = '\0';
                         tsp->tabCoord[li][1]=atoi(y);
 
                     }
                 }
-            }
+                else
+                {
+                    erreur("ERREUR: dimension inférieure à 1");
+                }
+            } 
         }
         fclose(fichier);
     }
@@ -111,6 +120,8 @@ int lire_fichier_test(char* chemin, instance_t* tsp )
         fclose(fichier);
         return 0;
     }
+    printf("dimension\n");
+    printf("%s\n%s\n%d\n%s\n", tsp->name, tsp->type, tsp->dimension, tsp->EDGE_TYPE);
     return 1;   
 }
 
@@ -122,6 +133,7 @@ int lire_fichier_test(char* chemin, instance_t* tsp )
 
 int main(int n, char* param[])
 {
+    printf("\ndebutmain\n");
     instance_t problemeTsp;
     tour_t problemeTour;
 
@@ -136,14 +148,15 @@ int main(int n, char* param[])
     int random = 0;
     int opt2 = 0;
     int algogenetique = 0;
-    int i=0;
+    int i=1;
     while (i<n)
     {
         if (strcmp(param[i],"-f")==0)
         {
             if (i+1<n)
             {
-                fichiertest = param[i];
+                fichiertest = param[i+1];
+                i++;
             }
             else
             {
@@ -154,7 +167,8 @@ int main(int n, char* param[])
         {
             if (i+1<n)
             {
-                fichiersol = param[i];
+                fichiersol = param[i+1];
+                i++;
             }
             else
             {
@@ -201,6 +215,7 @@ int main(int n, char* param[])
         {
             printf("\nUsage :  ./tsp -f <file> [-t <tour>] [-v [<file>]] -<méthode> [-h]\n\n-f <file> : nom du fichier tsp (obligatoire)\n-t <file> : nom du fichier solution (optionnel)\n-v [<file>] : mode verbose (optionnel), écrit des informations intermédiaires à l’écran ou dans un fichier si un nom de fichier est présent.\n-o <file> : export des résultats sans un fichier csv\n-h : help, affiche ce texte\n\n<méthode> : méthodes de calcul (cumulables) :\n\n-bf : brute force,\n-bfm : brute force en utilisant la matrice des distances,\n-ppv : plus proche voisin,\n-rw : random walk,\n-2opt : 2 optimisation. Si -ppv ou -rw ne sont pas présentes on utilise -rw,\n-ga <nombre d’individus> <nombre de générations> <taux de mutation> : algorithme génétique,défaut = 20 individus, 200 générations, 0.3 mutation.\n");
         }
+        i++;
     }
     if (fichiertest == NULL)
     {
@@ -210,11 +225,15 @@ int main(int n, char* param[])
     {
         erreur("ERREUR: Methode de resolution non specifiee");
     }
-    lire_fichier_test(fichiertest, &problemeTsp);
-
-    if (forceBrute)
+    printf("\ndebutmain\n");
+    if (lire_fichier_test(fichiertest, &problemeTsp))
     {
-        force_brute(&problemeTsp);
+        if (forceBrute==1)
+        {
+            int* tour_max=creer_tab_int(problemeTsp.dimension);
+            force_brute(&problemeTsp, tour_max);
+            affiche_tab_int(problemeTsp.tabTour,problemeTsp.dimension);
+        }
     }
     return 0;
 }

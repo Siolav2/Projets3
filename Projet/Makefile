@@ -1,9 +1,11 @@
 COMPILATEUR = gcc
-CFLAGS = -Wall -Wextra
+CFLAGS = -Wall
 EXEC = tsp
 SOURCES = main.c tools.c force_brute.c
 LIBS = -lm
 FILES_o = main.o tools.o force_brute.o
+FICHIER_TEST = Data/att10.tsp
+METHODE = -bf
 
 all:
 	$(COMPILATEUR) $(CFLAGS) -c $(SOURCES)
@@ -11,7 +13,7 @@ all:
 	make clean
 
 run : all
-	./$(EXEC)
+	./$(EXEC) -f $(FICHIER_TEST) $(METHODE)
 	make clean
 
 clean :

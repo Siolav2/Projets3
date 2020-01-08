@@ -35,11 +35,13 @@ char * creer_tab_char(int dim){
   return (char *)malloc(dim*sizeof(char));
 }
 
-void affiche_tab_int(int *tab,int dim, FILE *logfp){
-  fprintf(logfp,"[");
-  for (int i=0;i<dim-1;i++)
-    fprintf(logfp,"%d,",tab[i]);
-  fprintf(logfp,"%d]\n",tab[dim-1]);
+void affiche_tab_int(int *tab,int dim){
+  printf("[");
+  for (int i=0; i<dim; i++)
+  {
+    printf("%d ",tab[i]);
+  }
+  printf("]");
 }
 
 void affiche_tab_char_hex(char *tab,int dim, FILE *logfp){
@@ -62,14 +64,16 @@ int ** creer_mat_int(int nbRows,int nbCol){
 }
 
 double ** creer_mat_dist(int dimension){
-  /// \brief crée la matrice carrées des distances = tab dynamique triangulaire
-  /// \brief chaque ligne a une case de moins que la précédente
   double ** tab = (double **)malloc(dimension*sizeof(double *));
   for (int i=0;i<dimension;i++)
-    tab[i] = (double *) malloc(dimension*sizeof(double));
-    dimension--;
+  {
+    tab[i] = (double *) malloc(dimension*sizeof(double)); 
+  }
+  dimension--;
   return tab;
 }
+/// \brief crée la matrice carrées des distances = tab dynamique triangulaire
+  /// \brief chaque ligne a une case de moins que la précédente
 
 void swap (int *tab,int ind1,int ind2)
 /// \brief inverse le contenu des cases ind1 et ind2 dans tab
@@ -101,19 +105,29 @@ void renverse_tab(int *tab,int prem,int der){
 
 //FONCTIONS RAJOUTEES
 
-int calcul_distance(int x1, int y1, int x2, int y2)
+double calcul_distance(int x1, int y1, int x2, int y2)
 {
     return sqrt((double)((x2-x1)*(x2-x1) + (y2-y1)*(y2-y1)));
 }
 
 
 
-int calcul_distance_totale(instance_t* instance)
+double calcul_distance_totale(instance_t* instance)
 {
-  int distance=0;
+  double distance=0;
   for (int i=0; i<(instance->dimension-1); i++)
   {
-    distance=distance+calcul_distance(instance->tabCoord[i][0],instance->tabCoord[i][1],instance->tabCoord[i+1][0],instance->tabCoord[i+1][1]);
+    distance=distance+calcul_distance(instance->tabCoord[(instance->tabTour[i])-1][0],instance->tabCoord[(instance->tabTour[i])-1][1],instance->tabCoord[(instance->tabTour[i+1])-1][0],instance->tabCoord[(instance->tabTour[i+1])-1][1]);
   }
   return distance;
+}
+
+
+void copier_tableau(int* tab1,int* tab2, instance_t* tsp)
+{
+  int i;
+  for (i=0; i<tsp->dimension; i++)
+  {
+    tab2[i] = tab1[i];
+  }
 }
