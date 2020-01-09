@@ -5,10 +5,5 @@
 #include <stddef.h>
 #include "tspstat.h"
 
-
-
-
-
-
-bool prochaine_permutation(int tab[], int longueur);
-void force_brute(instance_t* instance, int* tour_max);
+int recherche_valeur(int* tab, int val, int dim);
+void plus_proche_voisin(instance_t* tsp);

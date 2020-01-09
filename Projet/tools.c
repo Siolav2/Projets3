@@ -115,18 +115,22 @@ double calcul_distance(int x1, int y1, int x2, int y2)
 double calcul_distance_totale(instance_t* instance)
 {
   double distance=0;
-  for (int i=0; i<(instance->dimension-1); i++)
+  int dim = instance->dimension-1;
+  distance = calcul_distance(0, 0, instance->tabCoord[instance->tabTour[1]-1][0], instance->tabCoord[instance->tabTour[1]-1][1]);
+  
+  for (int i=1; i<=dim; i++)
   {
-    distance=distance+calcul_distance(instance->tabCoord[(instance->tabTour[i])-1][0],instance->tabCoord[(instance->tabTour[i])-1][1],instance->tabCoord[(instance->tabTour[i+1])-1][0],instance->tabCoord[(instance->tabTour[i+1])-1][1]);
+    distance=distance+calcul_distance(instance->tabCoord[instance->tabTour[i]-1][0],instance->tabCoord[instance->tabTour[i]-1][1],instance->tabCoord[instance->tabTour[i+1]-1][0],instance->tabCoord[instance->tabTour[i+1]-1][1]);
   }
+  distance = distance + calcul_distance(instance->tabCoord[instance->tabTour[dim+1]-1][0], instance->tabCoord[instance->tabTour[dim+1]-1][1], 0, 0);
   return distance;
 }
 
 
-void copier_tableau(int* tab1,int* tab2, instance_t* tsp)
+void copier_tableau(int* tab1,int* tab2, int dim)
 {
   int i;
-  for (i=0; i<tsp->dimension; i++)
+  for (i=0; i<dim; i++)
   {
     tab2[i] = tab1[i];
   }

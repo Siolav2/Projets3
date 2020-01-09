@@ -96,5 +96,5 @@ void dump_matrice_dist(instance_t instance);
 void print_solution(char * methode,instance_t instance,tour_t t,double longueur,double tps);
 double calcul_distance(int x1, int y1, int x2, int y2);
 double calcul_distance_totale(instance_t* instance);
-void copier_tableau(int* tab1,int* tab2, instance_t* tsp);
+void copier_tableau(int* tab1,int* tab2, int dim);
 #endif

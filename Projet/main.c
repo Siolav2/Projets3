@@ -1,129 +1,169 @@
 #include "tspstat.h"
 #include "force_brute.h"
+#include "plusprochevoisin.h"
+#include <time.h>
 #define NBCHARMAX 80
 
-int lire_fichier_test(char* chemin, instance_t* tsp)
+void afficher_resultat(instance_t tsp, char* chemin, char* methode, double temps)
 {
-    printf("\ndebutmain\n");
-    int depart;
-    char premier_mot[NBCHARMAX];
-    char x[NBCHARMAX];
-    char y[NBCHARMAX];
-    char ligne[NBCHARMAX];
-    int j,k=0;
-    FILE* fichier = fopen(chemin, "r");
-    if (fichier != NULL)
+    printf("J'ouvre le fichier : %s\n", chemin);
+    printf("*** Instance ***\n");
+    printf("Nom de l'instance ; %s\n", tsp.name);
+    printf("Nombre de villes (avec(0,0)) ; %d\n", tsp.dimension+1);
+    printf("Type %s\n", tsp.type);
+    printf("Point ; Abs ; Ord\n");
+    printf("\t0;\t0;\t0\n");
+    for (int i=0; i<tsp.dimension; i++)
     {
-        while (fgets(ligne, NBCHARMAX, fichier)!=NULL)
+        printf("\t%d",i+1);
+        for (int j=0; j<2; j++)
         {
-            int i=0;
-            while (i< NBCHARMAX && ligne[i]!=' ' && ligne[i]!='\n')
+            printf(";\t%d", tsp.tabCoord[i][j]);
+        }
+        printf("\n");
+    }
+    printf("\nMéthode ;\tLongueur ;\tTemps CPU (sec) ;\tTour\n");
+    printf("%s ;\t%lf ;\t%2f ;\t", methode, tsp.length, temps);
+    affiche_tab_int(tsp.tabTour, tsp.dimension+1);
+    printf("\n");
+    
+}
+
+
+
+
+
+
+int lire_fichier_test(char* chemin, instance_t* Tsp)
+{
+    
+
+    char premier_mot[NBCHARMAX];
+    char ligne[NBCHARMAX];
+    char x[20];
+    char y[20];
+
+    FILE* fichier = fopen(chemin, "r");
+    if(fichier != NULL) //si l'ouverture du fichier se passe correctement
+    {
+        //on lit tout le fichier ligne par ligne
+        while(fgets(ligne, NBCHARMAX, fichier) != NULL)
+        {
+            //on recupere le premier mot de la ligne
+            int depart = 0;
+            while(depart < NBCHARMAX && ligne[depart] != ' ' && ligne[depart] != '\n')
             {
-                premier_mot[i]=ligne[i];
-                i++;
+                premier_mot[depart] = ligne[depart];
+                depart++;
             }
-            premier_mot[i]='\0';
-            if (strcmp(premier_mot, "NAME")==0)
+            premier_mot[depart] = '\0';
+            
+            //on rentre la suite de la ligne dans le champ approprie
+            if(strcmp(premier_mot, "NAME")==0)
             {
-                depart=7;
-                while (ligne[depart]!='\n' && depart-7<NBCHARMAX)
+                int depart = 7;
+                while(ligne[depart] != '\n' && depart < NBCHARMAX)
                 {
-                    tsp->name[depart-7]=ligne[depart];
+                    Tsp->name[depart-7] = ligne[depart];
                     depart++;
                 }
-                tsp->name[depart-7]='\0';
+                Tsp->name[depart] = '\0';
             }
+
             if (strcmp(premier_mot, "TYPE")==0)
             {
                 depart=7;
                 while (ligne[depart]!='\n' && depart-7<NBCHARMAX)
                 {
-                    tsp->type[depart-7]=ligne[depart];
+                    Tsp->type[depart-7]=ligne[depart];
                     depart++;
                 }
-                tsp->type[depart-7]='\0';
-            }
-            if (strcmp(premier_mot, "DIMENSION")==0)
-            {
-                depart=12;
-                char char_dim[NBCHARMAX];
-                while (ligne[depart]!='\n' && depart-12<NBCHARMAX)
-                {
-                    char_dim[depart-12]=ligne[depart];
-                    depart++;
-                }
-                char_dim[depart-12]='\0';
-                tsp->dimension=atoi(char_dim);
+                Tsp->type[depart]='\0';
             }
 
-            tsp->tabTour=creer_tab_int(tsp->dimension);
-            for (int n=0; n<tsp->dimension; n++)
+            if(strcmp(premier_mot, "DIMENSION")==0)
             {
-                tsp->tabTour[n]=n+1;
-            }
-
-            if (strcmp(premier_mot, "EDGE_WEIGHT_TYPE")==0)
-            {
-                depart=19;
-                while (ligne[depart]!='\n' && depart-19<NBCHARMAX)
+                char dim[NBCHARMAX];
+                int depart = 12;
+                while(ligne[depart] != '\n' && depart < NBCHARMAX)
                 {
-                    tsp->EDGE_TYPE[depart-19]=ligne[depart];
+                    dim[depart-12] = ligne[depart];
                     depart++;
                 }
-                tsp->EDGE_TYPE[depart-19]='\0';
+                dim[depart] = '\0';
+
+                Tsp->dimension = atoi(dim);
             }
-            if (strcmp(premier_mot, "NODE_COORD_SECTION")==0)
+
+            if(strcmp(premier_mot, "EDGE_WEIGHT_TYPE")==0)
             {
-                tsp->tabCoord=creer_mat_int(tsp->dimension,2);
-                if (tsp->dimension>=1)
+                int depart = 19;
+                while(ligne[depart] != '\n' && depart < NBCHARMAX)
                 {
-                    for (int li=0; li<tsp->dimension; li++)
+                    Tsp->EDGE_TYPE[depart-19] = ligne[depart];
+                    depart++;
+                }
+                Tsp->EDGE_TYPE[depart] = '\0';
+            }
+            if(strcmp(premier_mot, "NODE_COORD_SECTION")==0)
+            {
+                int indice;
+                Tsp->tabCoord = creer_mat_int(Tsp->dimension,2);
+                Tsp->tabTour = creer_tab_int(Tsp->dimension+1);
+                for (int n=0; n<Tsp->dimension+1; n++)
+                {
+                    Tsp->tabTour[n]=n;
+                }
+                for(int i = 0; i < Tsp->dimension; i++)
+                {
+                    fgets(ligne, NBCHARMAX, fichier);
+
+                    int k = 0;
+                    while(ligne[k] != ' ') //on saute l'indice des coordonnees
                     {
-                        fgets(ligne, NBCHARMAX, fichier);
-                        k=0;
-                        while (ligne[k]!=' ')
-                        {
-                            k++;
-                        }
                         k++;
-                        j=k;
-                        while (ligne[k]!=' ' && k<NBCHARMAX)
-                        {
-                            x[k-j]=ligne[k];
-                            k++;
-                        }
-                        x[k-j] = '\0';
-                        tsp->tabCoord[li][0]=atoi(x);
-                        k++;
-                        j=k;
-                        while (ligne[k]!='\n' && k<NBCHARMAX)
-                        {
-                            y[k-j]=ligne[k];
-                            k++;
-                        }
-                        y[k-j] = '\0';
-                        tsp->tabCoord[li][1]=atoi(y);
-
                     }
+
+                    k++;
+                    indice = 0;
+                    while(ligne[k] != ' ') //on recupere la premiere coordonnee
+                    {
+                        x[indice] = ligne[k];
+
+                        k++;
+                        indice++;
+                    }
+                    x[indice] = '\0';
+
+                    Tsp->tabCoord[i][0] = atoi(x);
+
+                    indice = 0;
+                    while(ligne[k] != '\n') //on recupere la deuxieme coordonnee
+                    {
+                        y[indice] = ligne[k];
+
+                        k++;
+                        indice++;
+                    }
+                    y[indice] = '\0';
+
+                    Tsp->tabCoord[i][1] = atoi(y);
                 }
-                else
-                {
-                    erreur("ERREUR: dimension inférieure à 1");
-                }
-            } 
+            }
         }
+        
         fclose(fichier);
     }
-    else
+    else //si le chemin ne mene à rien
     {
-        erreur("ERREUR: fichier introuvable");
+        erreur("Fichier introuvable");
         fclose(fichier);
         return 0;
     }
-    printf("dimension\n");
-    printf("%s\n%s\n%d\n%s\n", tsp->name, tsp->type, tsp->dimension, tsp->EDGE_TYPE);
-    return 1;   
+
+    return 1;
 }
+
 
 
 
@@ -133,8 +173,7 @@ int lire_fichier_test(char* chemin, instance_t* tsp)
 
 int main(int n, char* param[])
 {
-    printf("\ndebutmain\n");
-    instance_t problemeTsp;
+    instance_t Tsp;
     tour_t problemeTour;
 
     char* fichiertest = NULL;
@@ -225,15 +264,34 @@ int main(int n, char* param[])
     {
         erreur("ERREUR: Methode de resolution non specifiee");
     }
-    printf("\ndebutmain\n");
-    if (lire_fichier_test(fichiertest, &problemeTsp))
+
+    if (lire_fichier_test(fichiertest, &Tsp))
     {
         if (forceBrute==1)
         {
-            int* tour_max=creer_tab_int(problemeTsp.dimension);
-            force_brute(&problemeTsp, tour_max);
-            affiche_tab_int(problemeTsp.tabTour,problemeTsp.dimension);
+            int* tour_max = creer_tab_int(Tsp.dimension);
+            clock_t debut = clock();
+            force_brute(&Tsp,tour_max);
+            clock_t fin = clock();
+            double temps = fin-debut;
+            afficher_resultat(Tsp, fichiertest, "BF_meilleur", temps);
+            copier_tableau(tour_max, Tsp.tabTour, Tsp.dimension+1);
+            double pire_distance = calcul_distance_totale(&Tsp);
+            printf("BF_pire ;\t%lf ;\t%2f ;\t", pire_distance, temps);
+            affiche_tab_int(tour_max, Tsp.dimension+1);
+            printf("\n");
+            return 1;
+        }
+        if (prochevoisin==1)
+        {
+            clock_t debut = clock();
+            plus_proche_voisin(&Tsp);
+            clock_t fin = clock();
+            double temps = fin-debut;
+            afficher_resultat(Tsp, fichiertest, "PPV", temps);
+            return 1;
         }
     }
+    
     return 0;
 }
