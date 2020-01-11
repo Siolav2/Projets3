@@ -1,5 +1,4 @@
 #include "force_brute.h"
-#include "tspstat.h"
 
 bool prochaine_permutation(int tab[],int longueur) {
     // Find non-increasing suffix

@@ -97,4 +97,6 @@ void print_solution(char * methode,instance_t instance,tour_t t,double longueur,
 double calcul_distance(int x1, int y1, int x2, int y2);
 double calcul_distance_totale(instance_t* instance);
 void copier_tableau(int* tab1,int* tab2, int dim);
+int recherche_valeur(int* tab, int val, int dim);
+int ppv(instance_t* tsp, int ind, int* tab, int* elem);
 #endif

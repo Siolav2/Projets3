@@ -1,6 +1,9 @@
 #include "tspstat.h"
 #include "force_brute.h"
 #include "plusprochevoisin.h"
+#include "randomwalk.h"
+#include "opt2.h"
+#include "algo_genet.h"
 #include <time.h>
 #define NBCHARMAX 80
 
@@ -23,7 +26,7 @@ void afficher_resultat(instance_t tsp, char* chemin, char* methode, double temps
         printf("\n");
     }
     printf("\nMéthode ;\tLongueur ;\tTemps CPU (sec) ;\tTour\n");
-    printf("%s ;\t%lf ;\t%2f ;\t", methode, tsp.length, temps);
+    printf("%s ;\t%lf ;\t%2f ;\t", methode, tsp.length, temps/1000000);
     affiche_tab_int(tsp.tabTour, tsp.dimension+1);
     printf("\n");
     
@@ -173,6 +176,7 @@ int lire_fichier_test(char* chemin, instance_t* Tsp)
 
 int main(int n, char* param[])
 {
+    srand(time(NULL));
     instance_t Tsp;
     tour_t problemeTour;
 
@@ -270,17 +274,20 @@ int main(int n, char* param[])
         if (forceBrute==1)
         {
             int* tour_max = creer_tab_int(Tsp.dimension);
+            int* tour_min = creer_tab_int(Tsp.dimension);
             clock_t debut = clock();
             force_brute(&Tsp,tour_max);
             clock_t fin = clock();
             double temps = fin-debut;
             afficher_resultat(Tsp, fichiertest, "BF_meilleur", temps);
+            copier_tableau(Tsp.tabTour, tour_min, Tsp.dimension+1);
             copier_tableau(tour_max, Tsp.tabTour, Tsp.dimension+1);
             double pire_distance = calcul_distance_totale(&Tsp);
             printf("BF_pire ;\t%lf ;\t%2f ;\t", pire_distance, temps);
             affiche_tab_int(tour_max, Tsp.dimension+1);
+            copier_tableau(tour_min, Tsp.tabTour, Tsp.dimension+1);
             printf("\n");
-            return 1;
+
         }
         if (prochevoisin==1)
         {
@@ -289,7 +296,34 @@ int main(int n, char* param[])
             clock_t fin = clock();
             double temps = fin-debut;
             afficher_resultat(Tsp, fichiertest, "PPV", temps);
-            return 1;
+        }
+        if (random==1)
+        {
+            clock_t debut = clock();
+            random_walk(&Tsp);
+            clock_t fin = clock();
+            double temps = fin-debut;
+            afficher_resultat(Tsp, fichiertest, "Random_Walk", temps);
+
+        }
+
+        if (opt2 == 1)
+        {
+            clock_t debut = clock();
+            optimisation(&Tsp);
+            clock_t fin = clock();
+            double temps = fin-debut;
+            afficher_resultat(Tsp, fichiertest, "2_optimisation", temps);
+        }
+
+        if (algogenetique == 1)
+        {
+            clock_t debut = clock();
+            mutation(&Tsp);
+            clock_t fin = clock();
+            double temps = fin-debut;
+            
+
         }
     }
     

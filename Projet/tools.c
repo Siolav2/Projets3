@@ -135,3 +135,66 @@ void copier_tableau(int* tab1,int* tab2, int dim)
     tab2[i] = tab1[i];
   }
 }
+
+
+
+
+int recherche_valeur(int* tab, int val, int dim)
+{
+    for (int i=0; i<dim; i++)
+    {
+        if (tab[i] == val)
+        {
+            return false;
+        }
+    }
+    return true;
+}
+
+
+
+
+int ppv(instance_t* tsp, int ind, int* tab, int* elem)
+{
+  double distance;
+  double distance_min = 100000000000000;
+  int to_return;
+  int* possible = creer_tab_int(tsp->dimension);
+
+  for (int i=0; i<tsp->dimension; i++)
+  {
+      possible[i]=i+1;
+  }
+
+  if (ind==0)
+  {
+    for (int i=0; i<tsp->dimension; i++)
+    {
+      distance = calcul_distance(0,0,tsp->tabCoord[possible[i]-1][0],tsp->tabCoord[possible[i]-1][1]);
+      if (distance<distance_min)
+        {
+          distance_min = distance;
+          to_return = i+1;
+        }
+    }
+  }
+  else
+  {
+    for (int i=0; i<tsp->dimension; i++)
+    {
+      if (possible[i]!=ind && recherche_valeur(tab, possible[i], tsp->dimension+1) && recherche_valeur(elem, possible[i], tsp->dimension+1))
+      
+      {
+        distance = calcul_distance(tsp->tabCoord[possible[i]-1][0],tsp->tabCoord[possible[i]-1][1],tsp->tabCoord[ind-1][0],tsp->tabCoord[ind-1][1]);
+        if (distance<distance_min)
+        {
+          distance_min = distance;
+          to_return = possible[i];
+        }
+      }
+      
+    }
+  }
+  return to_return;
+
+}

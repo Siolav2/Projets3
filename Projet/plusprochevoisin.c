@@ -1,20 +1,9 @@
 #include "plusprochevoisin.h"
-#include "tspstat.h"
 
 
 
 
-int recherche_valeur(int* tab, int val, int dim)
-{
-    for (int i=0; i<dim; i++)
-    {
-        if (tab[i] == val)
-        {
-            return false;
-        }
-    }
-    return true;
-}
+
 
 
 
@@ -24,7 +13,6 @@ int recherche_valeur(int* tab, int val, int dim)
 void plus_proche_voisin(instance_t* tsp)
 {
     int dim = tsp->dimension;
-    printf("%d\n",dim);
     double distance;
     double distance_min = 100000000000000;
     int ind_min;
@@ -54,7 +42,6 @@ void plus_proche_voisin(instance_t* tsp)
         {
             if(recherche_valeur(indice, possible[j], dim+1))
             {
-                printf("%d %d\t%d %d\n",tsp->tabCoord[indice[i]-1][0], tsp->tabCoord[indice[i]-1][1], tsp->tabCoord[possible[j]-1][0], tsp->tabCoord[possible[j]-1][1]);
                 distance = calcul_distance(tsp->tabCoord[indice[i]-1][0], tsp->tabCoord[indice[i]-1][1], tsp->tabCoord[possible[j]-1][0], tsp->tabCoord[possible[j]-1][1]);
                 if (distance<distance_min)
                 {
