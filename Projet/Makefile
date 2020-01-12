@@ -1,11 +1,11 @@
 COMPILATEUR = gcc
 CFLAGS = -Wall
 EXEC = tsp
-SOURCES = main.c tools.c force_brute.c plusprochevoisin.c randomwalk.c opt2.c algo_genet.c
+SOURCES = main.c tools.c force_brute.c plusprochevoisin.c randomwalk.c opt2.c algo_genet.c fb_matrice.c
 LIBS = -lm
-FILES_o = main.o tools.o force_brute.o plusprochevoisin.o randomwalk.o opt2.o algo_genet.o
+FILES_o = main.o tools.o force_brute.o plusprochevoisin.o randomwalk.o opt2.o algo_genet.o fb_matrice.o
 FICHIER_TEST = Data/att10.tsp
-METHODE = -ga
+METHODE = -bfm
 
 all:
 	$(COMPILATEUR) $(CFLAGS) -c $(SOURCES)

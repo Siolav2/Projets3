@@ -20,18 +20,22 @@ int croisement(int x1, int y1, int x2, int y2, int x3, int y3, int x4, int y4)
     
     if (m1 != m2)
     {
+        //si les droite ne sont pas paralleles cela veut dire qu'elles se croisent quelque part
         double i = (double)(p2-p1)/(double)(m1-m2);
         double j = m1*i+p1;
+        //calcul des coordonnees du point d'intersection des deux droites
 
         double distance_a1 = calcul_distance(x1, y1, i, j);
         double distance_a2 = calcul_distance(x2, y2, i, j);
-        double distance_1_2 = calcul_distance(x2, y2, x1, x2);
+        double distance_1_2 = calcul_distance(x2, y2, x1, y1);
         double distance_b1 = calcul_distance(x3, y3, i, j);
         double distance_b2 = calcul_distance(x4, y4, i, j);
-        double distance_3_4 = calcul_distance(x3, y3, x4, x4);
+        double distance_3_4 = calcul_distance(x3, y3, x4, y4);
+        //calcul de plusieurs distances pour savoir si le point d'intersection se situe sur les deux segments
 
         if (distance_a1<=distance_1_2 && distance_a2<=distance_1_2 && distance_b1<=distance_3_4 && distance_b2<=distance_3_4)
         {
+            //si le point d'intersection se situe sur les deux segments alors les segments se croisent
             return 1;
         }
     }
@@ -52,10 +56,11 @@ void optimisation(instance_t* tsp)
                 int x2 = tsp->tabCoord[tsp->tabTour[i+1]-1][0], y2 = tsp->tabCoord[tsp->tabTour[i+1]-1][1];
                 int x3 = tsp->tabCoord[tsp->tabTour[j]-1][0], y3 = tsp->tabCoord[tsp->tabTour[j]-1][1];
                 int x4 = tsp->tabCoord[tsp->tabTour[j+1]-1][0], y4 = tsp->tabCoord[tsp->tabTour[j+1]-1][1];
-
+                //on teste pour 2 segments avec aucun indice en commun si ils se croisent.
                 if (croisement(x1, y1, x2, y2, x3, y3, x4, y4))
                 {
-                    renverse_tab(tsp->tabTour, i,j+1);
+                    //si c'est le cas on inverse le sens du tableau entre le premier indice du premier segment et le deuxieme indice du deuxieme segement.
+                    renverse_tab(tsp->tabTour, i+1,j);
                 }
             }
         }

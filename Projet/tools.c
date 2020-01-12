@@ -107,6 +107,7 @@ void renverse_tab(int *tab,int prem,int der){
 
 double calcul_distance(int x1, int y1, int x2, int y2)
 {
+    //formule mathematique.
     return sqrt((double)((x2-x1)*(x2-x1) + (y2-y1)*(y2-y1)));
 }
 
@@ -116,17 +117,24 @@ double calcul_distance_totale(instance_t* instance)
 {
   double distance=0;
   int dim = instance->dimension-1;
+  //calcul de la distance depuis le point de depart de coordonnee 0,0 vers le premier indice de tabTour.
   distance = calcul_distance(0, 0, instance->tabCoord[instance->tabTour[1]-1][0], instance->tabCoord[instance->tabTour[1]-1][1]);
+  //tabTour contrairement a tabCoord contient en premier indice le point 0. Qui a pour coordonnees 0,0.
+  //donc tabTour contient 1 element de plus que tabCoord d'ou le "-1" apres instance->tabTour[1] qui est la pour pas sortir du tableau tabCoord.
   
+
+  //on ajoute à la variable distance la distance entre chaque indice contenus dans tabTour.
   for (int i=1; i<=dim; i++)
   {
     distance=distance+calcul_distance(instance->tabCoord[instance->tabTour[i]-1][0],instance->tabCoord[instance->tabTour[i]-1][1],instance->tabCoord[instance->tabTour[i+1]-1][0],instance->tabCoord[instance->tabTour[i+1]-1][1]);
   }
+  //on fini par ajouter la distance entre le dernier indice de tabTour et le premier indice de tabTour qui a pour coordonnees 0,0.
   distance = distance + calcul_distance(instance->tabCoord[instance->tabTour[dim+1]-1][0], instance->tabCoord[instance->tabTour[dim+1]-1][1], 0, 0);
   return distance;
 }
 
 
+//copie tab1 dans tab2.
 void copier_tableau(int* tab1,int* tab2, int dim)
 {
   int i;
@@ -138,7 +146,7 @@ void copier_tableau(int* tab1,int* tab2, int dim)
 
 
 
-
+//recherche la valeur val dans le tableau tab de dimension dim. Si elle est presente renvoi false sinon renvoi true.
 int recherche_valeur(int* tab, int val, int dim)
 {
     for (int i=0; i<dim; i++)
@@ -153,9 +161,10 @@ int recherche_valeur(int* tab, int val, int dim)
 
 
 
-
+//fonction utilisee pour algo_genet.
 int ppv(instance_t* tsp, int ind, int* tab, int* elem)
 {
+  //le tableau tab ici represente le tableau reconstruction dans croisement DPX.
   double distance;
   double distance_min = 100000000000000;
   int to_return;
@@ -165,7 +174,7 @@ int ppv(instance_t* tsp, int ind, int* tab, int* elem)
   {
       possible[i]=i+1;
   }
-
+  //le tableau possible contient tous les ppv possibles.
   if (ind==0)
   {
     for (int i=0; i<tsp->dimension; i++)
@@ -178,11 +187,19 @@ int ppv(instance_t* tsp, int ind, int* tab, int* elem)
         }
     }
   }
+  /*si on cherche le plus proche voisin de 0, alors on calcule toutes les distances entre le point 0 et les indices differents de 0 (possile de contient pas 0)
+  comme possible ne contient pas 0 on renvoi i+1.
+  sinon si indice est different de 0 on passe dans le else.
+  */
   else
   {
     for (int i=0; i<tsp->dimension; i++)
     {
       if (possible[i]!=ind && recherche_valeur(tab, possible[i], tsp->dimension+1) && recherche_valeur(elem, possible[i], tsp->dimension+1))
+      /*si la l'indice donne par possible[i] est pas present dans le tableau que l'on veut remplir et si possible[i] n'est pas present non plus
+      dans le tableau des element que l'on veut pas retourner elem (par exemple pour att10, le plus proche voisin de 4 c'est 10. si on met 10 dans elem
+      alors la fonction de pourra pas return 10 car on cherche le 2 ieme ppv de 4 et pas le premier.) alors on peut faire le calcul de distance.
+      */ 
       
       {
         distance = calcul_distance(tsp->tabCoord[possible[i]-1][0],tsp->tabCoord[possible[i]-1][1],tsp->tabCoord[ind-1][0],tsp->tabCoord[ind-1][1]);
@@ -192,6 +209,8 @@ int ppv(instance_t* tsp, int ind, int* tab, int* elem)
           to_return = possible[i];
         }
       }
+      //on calcul pour chaque i les distance entre l'indice demande et i et on en retient l'indice qui est le plus proche de l'indice demande
+      //en prenant en compte les tableaux tab et elem.
       
     }
   }
